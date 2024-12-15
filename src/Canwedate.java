@@ -12,420 +12,297 @@ import java.util.MissingResourceException;
  
 import CLIPSJNI.*;
 
-/* Implement FindFact which returns just a FactAddressValue or null */
-/* TBD Add size method to PrimitiveValue */
+class Canwedate implements ActionListener {
+    JLabel displayLabel;
+    String imagePath = "Images/";
+    String heartUnselectedPath = imagePath + "heart-unselected.png";
+    String heartSelectedPath = imagePath + "heart-selected.png";
+    Color mainBackgroundColor = Color.decode("#FFC0CB");
+    JButton nextButton;
+    JButton prevButton;
+    JPanel choicesPanel;
+    ButtonGroup choicesButtons;
+    ResourceBundle canwedateresources;
 
-/*
+    Environment clips;
+    boolean isExecuting = false;
+    Thread executionThread;
 
-Notes:
-
-This example creates just a single environment. If you create multiple environments,
-call the destroy method when you no longer need the environment. This will free the
-C data structures associated with the environment.
-
-   clips = new Environment();
-      .
-      . 
-      .
-   clips.destroy();
-
-Calling the clear, reset, load, loadFacts, run, eval, build, assertString,
-and makeInstance methods can trigger CLIPS garbage collection. If you need
-to retain access to a PrimitiveValue returned by a prior eval, assertString,
-or makeInstance call, retain it and then release it after the call is made.
-
-   PrimitiveValue pv1 = clips.eval("(myFunction foo)");
-   pv1.retain();
-   PrimitiveValue pv2 = clips.eval("(myFunction bar)");
-      .
-      .
-      .
-   pv1.release();
-
-*/
-
-class Canwedate implements ActionListener
-  {  
-   JLabel displayLabel;
-   String imagePath = getClass().getResource("/resources/").getPath();
-   JButton nextButton;
-   JButton prevButton;
-   JPanel choicesPanel;
-   ButtonGroup choicesButtons;
-   ResourceBundle canwedateresources;
- 
-   Environment clips;
-   boolean isExecuting = false;
-   Thread executionThread;
-      
-   Canwedate()
-     {  
-      try
-        {
-         canwedateresources = ResourceBundle.getBundle("resources.CanWeDateResources",Locale.getDefault());
+    Canwedate() {
+        try {
+            canwedateresources = ResourceBundle.getBundle("resources.CanWeDateResources", Locale.getDefault());
+        } catch (MissingResourceException mre) {
+            mre.printStackTrace();
+            return;
         }
-      catch (MissingResourceException mre)
-        {
-         mre.printStackTrace();
-         return;
-        }
-      
-      /*================================*/
-      /* Create a new JFrame container. */
-      /*================================*/
-     
-      JFrame jfrm = new JFrame(canwedateresources.getString("CanWeDate"));  
- 
-      /*=============================*/
-      /* Specify FlowLayout manager. */
-      /*=============================*/
+
+       
+        JFrame jfrm = new JFrame(canwedateresources.getString("CanWeDate"));
+        ImageIcon img = new ImageIcon(imagePath + "heart.png");
+        jfrm.setIconImage(img.getImage());
+
         
-      jfrm.getContentPane().setLayout(new GridLayout(3,1));  
- 
-      /*=================================*/
-      /* Give the frame an initial size. */
-      /*=================================*/
-     
-      jfrm.setSize(500,300);  
-  
-      /*=============================================================*/
-      /* Terminate the program when the user closes the application. */
-      /*=============================================================*/
-     
-      jfrm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  
- 
-      /*===========================*/
-      /* Create the display panel. */
-      /*===========================*/
-      
-      JPanel displayPanel = new JPanel(); 
-      displayLabel = new JLabel();
-      displayPanel.add(displayLabel);
-      
-      /*===========================*/
-      /* Create the choices panel. */
-      /*===========================*/
-     
-      choicesPanel = new JPanel(); 
-      choicesButtons = new ButtonGroup();
-      
-      /*===========================*/
-      /* Create the buttons panel. */
-      /*===========================*/
+        jfrm.getContentPane().setLayout(new GridBagLayout());
+        jfrm.getContentPane().setBackground(mainBackgroundColor);
 
-      JPanel buttonPanel = new JPanel(); 
-      
-      prevButton = new JButton(canwedateresources.getString("Prev"));
-      prevButton.setActionCommand("Prev");
-      buttonPanel.add(prevButton);
-      prevButton.addActionListener(this);
-      
-      nextButton = new JButton(canwedateresources.getString("Next"));
-      nextButton.setActionCommand("Next");
-      buttonPanel.add(nextButton);
-      nextButton.addActionListener(this);
-     
-      /*=====================================*/
-      /* Add the panels to the content pane. */
-      /*=====================================*/
-      
-      jfrm.getContentPane().add(displayPanel); 
-      jfrm.getContentPane().add(choicesPanel); 
-      jfrm.getContentPane().add(buttonPanel); 
-
-      /*========================*/
-      /* Load the auto program. */
-      /*========================*/
-      
-      clips = new Environment();
-      
-      clips.load("CanWeDate.clp");
-      
-      clips.reset();
-      runAuto();
-
-      /*====================*/
-      /* Display the frame. */
-      /*====================*/
-      
-      jfrm.setVisible(true);  
-     }  
-
-   /****************/
-   /* nextUIState: */
-   /****************/  
-   private void nextUIState() throws Exception
-     {
-      /*=====================*/
-      /* Get the state-list. */
-      /*=====================*/
-      
-      String evalStr = "(find-all-facts ((?f state-list)) TRUE)";
-      
-      String currentID = clips.eval(evalStr).get(0).getFactSlot("current").toString();
-
-      /*===========================*/
-      /* Get the current UI state. */
-      /*===========================*/
-      
-      evalStr = "(find-all-facts ((?f UI-state)) " +
-                                "(eq ?f:id " + currentID + "))";
-      
-      PrimitiveValue fv = clips.eval(evalStr).get(0);
-      
-      /*========================================*/
-      /* Determine the Next/Prev button states. */
-      /*========================================*/
-      
-      if (fv.getFactSlot("state").toString().equals("final"))
-        { 
-         nextButton.setActionCommand("Restart");
-         nextButton.setText(canwedateresources.getString("Restart")); 
-         prevButton.setVisible(true);
-        }
-      else if (fv.getFactSlot("state").toString().equals("initial"))
-        {
-         nextButton.setActionCommand("Next");
-         nextButton.setText(canwedateresources.getString("Next"));
-         prevButton.setVisible(false);
-        }
-      else
-        { 
-         nextButton.setActionCommand("Next");
-         nextButton.setText(canwedateresources.getString("Next"));
-         prevButton.setVisible(true);
-        }
-      
-      /*=====================*/
-      /* Set up the choices. */
-      /*=====================*/
-      
-      choicesPanel.removeAll();
-      choicesButtons = new ButtonGroup();
-      if (fv.getFactSlot("state").toString().equals("final"))
-      {
-    	  	String path = imagePath + fv.getFactSlot("display").toString() + ".png";
-    	    ImageIcon originalIcon = new ImageIcon(path);
-    	    
-    	    JLabel imageLabel = new JLabel(originalIcon);
-    	    choicesPanel.removeAll(); 
-    	    choicesPanel.setLayout(new BorderLayout());
-    	    choicesPanel.add(imageLabel, BorderLayout.CENTER);
-
-    	    choicesPanel.revalidate();
-    	    choicesPanel.repaint();
-      }
-      else {
-    	  
-    	  PrimitiveValue pv = fv.getFactSlot("valid-answers");
-          
-          String selected = fv.getFactSlot("response").toString();
-          
-        	  for (int i = 0; i < pv.size(); i++) 
-              {
-               PrimitiveValue bv = pv.get(i);
-               JRadioButton rButton;
-                              
-               if (bv.toString().equals(selected))
-                  { rButton = new JRadioButton(canwedateresources.getString(bv.toString()),true); }
-               else
-                  { rButton = new JRadioButton(canwedateresources.getString(bv.toString()),false); }
-                           
-               rButton.setActionCommand(bv.toString());
-               choicesPanel.add(rButton);
-               choicesButtons.add(rButton);
-          }
-    	  
-      }
         
-      choicesPanel.repaint();
-      
-      /*====================================*/
-      /* Set the label to the display text. */
-      /*====================================*/
+        jfrm.setSize(900, 400);
 
-      String theText = canwedateresources.getString(fv.getFactSlot("display").symbolValue());
-            
-      wrapLabelText(displayLabel,theText);
-      
-      executionThread = null;
-      
-      isExecuting = false;
-     }
+        // Terminate the program on close
+        jfrm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-   /*########################*/
-   /* ActionListener Methods */
-   /*########################*/
+        // Create display panel
+        JPanel displayPanel = new JPanel(new GridBagLayout());
+        displayLabel = new JLabel();
+        displayPanel.add(displayLabel);
+        displayPanel.setBackground(mainBackgroundColor);
 
-   /*******************/
-   /* actionPerformed */
-   /*******************/  
-   public void actionPerformed(
-     ActionEvent ae) 
-     { 
-      try
-        { onActionPerformed(ae); }
-      catch (Exception e)
-        { e.printStackTrace(); }
-     }
- 
-   /***********/
-   /* runAuto */
-   /***********/  
-   public void runAuto()
-     {
-      Runnable runThread = 
-         new Runnable()
-           {
-            public void run()
-              {
-               clips.run();
-               
-               SwingUtilities.invokeLater(
-                  new Runnable()
-                    {
-                     public void run()
-                       {
-                        try 
-                          { nextUIState(); }
-                        catch (Exception e)
-                          { e.printStackTrace(); }
-                       }
-                    });
-              }
-           };
-      
-      isExecuting = true;
-      
-      executionThread = new Thread(runThread);
-      
-      executionThread.start();
-     }
-   
-   /*********************/
-   /* showPNG */
-   /*********************/  
-   public JPanel ShowPNG(String arg){
-	   JPanel panel = new JPanel(); 
-	      if (arg == null ) {
-	        return panel;
-	    }      
-	    ImageIcon icon = new ImageIcon(arg); 
-	    JLabel label = new JLabel(); 
-	    label.setIcon(icon); 
-	    panel.add(label);
-		return panel;
-	  }
+        // Create choices panel
+        choicesPanel = new JPanel(new GridBagLayout());
+        choicesButtons = new ButtonGroup();
+        choicesPanel.setBackground(mainBackgroundColor);
 
-   /*********************/
-   /* onActionPerformed */
-   /*********************/  
-   
-   public void onActionPerformed(
-     ActionEvent ae) throws Exception 
-     { 
-      if (isExecuting) return;
-      
-      /*=====================*/
-      /* Get the state-list. */
-      /*=====================*/
-      
-      String evalStr = "(find-all-facts ((?f state-list)) TRUE)";
-      
-      String currentID = clips.eval(evalStr).get(0).getFactSlot("current").toString();
+        // Create button panel
+        JPanel buttonPanel = new JPanel(new GridBagLayout());
 
-      /*=========================*/
-      /* Handle the Next button. */
-      /*=========================*/
-      
-      if (ae.getActionCommand().equals("Next"))
-        {
-         if (choicesButtons.getButtonCount() == 0)
-           { clips.assertString("(next " + currentID + ")"); }
-         else
-           {
-            clips.assertString("(next " + currentID + " " +
-                               choicesButtons.getSelection().getActionCommand() + 
-                               ")");
-           }
-           
-         runAuto();
+        prevButton = new JButton(canwedateresources.getString("Prev"));
+        prevButton.setActionCommand("Prev");
+        prevButton.addActionListener(this);
+
+        nextButton = new JButton(canwedateresources.getString("Next"));
+        nextButton.setActionCommand("Next");
+        nextButton.addActionListener(this);
+
+        GridBagConstraints gbcButton = new GridBagConstraints();
+        gbcButton.gridx = 0;
+        gbcButton.gridy = 0;
+        gbcButton.insets = new Insets(5, 5, 5, 5);
+
+        buttonPanel.add(prevButton, gbcButton);
+
+        gbcButton.gridx = 1;
+        buttonPanel.add(nextButton, gbcButton);
+        buttonPanel.setBackground(mainBackgroundColor);
+
+        // Add panels to content pane
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.BOTH;
+        //gbc.insets = new Insets(10, 10, 10, 10);
+
+        jfrm.getContentPane().add(displayPanel, gbc);
+
+        gbc.gridy = 1;
+        jfrm.getContentPane().add(choicesPanel, gbc);
+
+        gbc.gridy = 2;
+        jfrm.getContentPane().add(buttonPanel, gbc);
+
+        // Load CLIPS program
+        clips = new Environment();
+
+        clips.load("CanWeDate.clp");
+
+        clips.reset();
+        runAuto();
+
+        // Display the frame
+        jfrm.setVisible(true);
+    }
+
+    private void nextUIState() throws Exception {
+        /*=====================*/
+        /* Get the state-list. */
+        /*=====================*/
+        String evalStr = "(find-all-facts ((?f state-list)) TRUE)";
+
+        String currentID = clips.eval(evalStr).get(0).getFactSlot("current").toString();
+
+        /*===========================*/
+        /* Get the current UI state. */
+        /*===========================*/
+
+        evalStr = "(find-all-facts ((?f UI-state)) " +
+                  "(eq ?f:id " + currentID + "))";
+
+        PrimitiveValue fv = clips.eval(evalStr).get(0);
+
+        /*========================================*/
+        /* Determine the Next/Prev button states. */
+        /*========================================*/
+
+        if (fv.getFactSlot("state").toString().equals("final")) {
+            nextButton.setActionCommand("Restart");
+            nextButton.setText(canwedateresources.getString("Restart"));
+            prevButton.setVisible(true);
+        } else if (fv.getFactSlot("state").toString().equals("initial")) {
+            nextButton.setActionCommand("Next");
+            nextButton.setText(canwedateresources.getString("Next"));
+            prevButton.setVisible(false);
+        } else {
+            nextButton.setActionCommand("Next");
+            nextButton.setText(canwedateresources.getString("Next"));
+            prevButton.setVisible(true);
         }
-      else if (ae.getActionCommand().equals("Restart"))
-        { 
-         clips.reset(); 
-         runAuto();
-        }
-      else if (ae.getActionCommand().equals("Prev"))
-        {
-         clips.assertString("(prev " + currentID + ")");
-         runAuto();
-        }
-     }
 
-   /*****************/
-   /* wrapLabelText */
-   /*****************/  
-   private void wrapLabelText(
-     JLabel label, 
-     String text) 
-     {
-      FontMetrics fm = label.getFontMetrics(label.getFont());
-      Container container = label.getParent();
-      int containerWidth = container.getWidth();
-      int textWidth = SwingUtilities.computeStringWidth(fm,text);
-      int desiredWidth;
+        /*=====================*/
+        /* Set up the choices. */
+        /*=====================*/
 
-      if (textWidth <= containerWidth)
-        { desiredWidth = containerWidth; }
-      else
-        { 
-         int lines = (int) ((textWidth + containerWidth) / containerWidth);
-                  
-         desiredWidth = (int) (textWidth / lines);
+        choicesPanel.removeAll(); // Remove all previous components
+        choicesPanel.setLayout(new GridBagLayout()); // Reset layout to default
+        choicesButtons = new ButtonGroup();
+
+        if (fv.getFactSlot("state").toString().equals("final")) {
+            String path = imagePath + fv.getFactSlot("display").toString() + ".png";
+            ImageIcon originalIcon = new ImageIcon(path);
+
+            JLabel imageLabel = new JLabel(originalIcon);
+            choicesPanel.add(imageLabel, new GridBagConstraints()); // Center the image
+        } else {
+            PrimitiveValue pv = fv.getFactSlot("valid-answers");
+            String selected = fv.getFactSlot("response").toString();
+
+
+            for (int i = 0; i < pv.size(); i++) {
+                PrimitiveValue bv = pv.get(i);
+                JRadioButton rButton;
+
+                if (bv.toString().equals(selected)) {
+                    rButton = new CustomJRadioButton(heartUnselectedPath, heartSelectedPath, canwedateresources.getString(bv.toString()), true);
+                } else {
+                    rButton = new CustomJRadioButton(heartUnselectedPath, heartSelectedPath, canwedateresources.getString(bv.toString()), false);
+                }
+
+                rButton.setActionCommand(bv.toString());
+                choicesPanel.add(rButton);
+                choicesButtons.add(rButton);
+            }
         }
-                 
-      BreakIterator boundary = BreakIterator.getWordInstance();
-      boundary.setText(text);
-   
-      StringBuffer trial = new StringBuffer();
-      StringBuffer real = new StringBuffer("<html><center>");
-   
-      int start = boundary.first();
-      for (int end = boundary.next(); end != BreakIterator.DONE;
-           start = end, end = boundary.next())
-        {
-         String word = text.substring(start,end);
-         trial.append(word);
-         int trialWidth = SwingUtilities.computeStringWidth(fm,trial.toString());
-         if (trialWidth > containerWidth) 
-           {
-            trial = new StringBuffer(word);
-            real.append("<br>");
-            real.append(word);
-           }
-         else if (trialWidth > desiredWidth)
-           {
-            trial = new StringBuffer("");
-            real.append(word);
-            real.append("<br>");
-           }
-         else
-           { real.append(word); }
+
+        choicesPanel.revalidate();
+        choicesPanel.repaint();
+
+        /*====================================*/
+        /* Set the label to the display text. */
+        /*====================================*/
+
+        String theText = canwedateresources.getString(fv.getFactSlot("display").symbolValue());
+
+        wrapLabelText(displayLabel, theText);
+
+        executionThread = null;
+
+        isExecuting = false;
+    }
+    public void actionPerformed(ActionEvent ae) {
+        try {
+            onActionPerformed(ae);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-   
-      real.append("</html>");
-   
-      label.setText(real.toString());
-     }
-     
-   public static void main(String args[])
-     {  
-      // Create the frame on the event dispatching thread.  
-      SwingUtilities.invokeLater(
-        new Runnable() 
-          {  
-           public void run() { new Canwedate(); }  
-          });   
-     }  
-  }
+    }
+
+    public void runAuto() {
+        Runnable runThread = new Runnable() {
+            public void run() {
+                clips.run();
+
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        try {
+                            nextUIState();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+        };
+
+        isExecuting = true;
+
+        executionThread = new Thread(runThread);
+
+        executionThread.start();
+    }
+
+    public void onActionPerformed(ActionEvent ae) throws Exception {
+        if (isExecuting) return;
+
+        String evalStr = "(find-all-facts ((?f state-list)) TRUE)";
+
+        String currentID = clips.eval(evalStr).get(0).getFactSlot("current").toString();
+
+        if (ae.getActionCommand().equals("Next")) {
+            if (choicesButtons.getButtonCount() == 0) {
+                clips.assertString("(next " + currentID + ")");
+            } else {
+                clips.assertString("(next " + currentID + " " + choicesButtons.getSelection().getActionCommand() + ")");
+            }
+
+            runAuto();
+        } else if (ae.getActionCommand().equals("Restart")) {
+            clips.reset();
+            runAuto();
+        } else if (ae.getActionCommand().equals("Prev")) {
+            clips.assertString("(prev " + currentID + ")");
+            runAuto();
+        }
+    }
+
+    private void wrapLabelText(JLabel label, String text) {
+        FontMetrics fm = label.getFontMetrics(label.getFont());
+        Container container = label.getParent();
+        int containerWidth = container.getWidth();
+        int textWidth = SwingUtilities.computeStringWidth(fm, text);
+        int desiredWidth;
+
+        if (textWidth <= containerWidth) {
+            desiredWidth = containerWidth;
+        } else {
+            int lines = (int) ((textWidth + containerWidth) / containerWidth);
+
+            desiredWidth = (int) (textWidth / lines);
+        }
+
+        BreakIterator boundary = BreakIterator.getWordInstance();
+        boundary.setText(text);
+
+        StringBuffer trial = new StringBuffer();
+        StringBuffer real = new StringBuffer("<html><center>");
+
+        int start = boundary.first();
+        for (int end = boundary.next(); end != BreakIterator.DONE; start = end, end = boundary.next()) {
+            String word = text.substring(start, end);
+            trial.append(word);
+            int trialWidth = SwingUtilities.computeStringWidth(fm, trial.toString());
+            if (trialWidth > containerWidth) {
+                trial = new StringBuffer(word);
+                real.append("<br>");
+                real.append(word);
+            } else if (trialWidth > desiredWidth) {
+                trial = new StringBuffer("");
+                real.append(word);
+                real.append("<br>");
+            } else {
+                real.append(word);
+            }
+        }
+
+        real.append("</html>");
+
+        label.setText(real.toString());
+    }
+
+    public static void main(String args[]) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                new Canwedate();
+            }
+        });
+    }
+}
