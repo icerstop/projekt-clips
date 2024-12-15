@@ -696,4 +696,3 @@
    (modify ?f2 (current ?p))
    
    (halt))
-   
