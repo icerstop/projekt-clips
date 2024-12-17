@@ -378,6 +378,7 @@
    (logical (choice Yes))
    (logical (would-you No))
    (logical (job-suck No))
+   (logical (kids-back No))
    )
    =>
    (assert (UI-state (display BetterNotRespond)
@@ -507,6 +508,7 @@
    (logical (farmer Yes))
    (logical (japan-live Yes))
    (logical (please-move Yes))
+   (logical (together No))
    )
    =>
    (assert (UI-state (display DownlowRespond)
@@ -696,3 +698,4 @@
    (modify ?f2 (current ?p))
    
    (halt))
+   
