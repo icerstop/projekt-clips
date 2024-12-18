@@ -44,7 +44,7 @@ Podczas realizacji nauczyliśmy się, jak działają systemy eksperckie, jak pop
 1. Sklonuj repozytorium na swoje urządzenie używając polecenia **git clone https://github.com/icerstop/projekt-clips.git**.
 2. Otwórz projekt w **Eclipse IDE** klikając **Import** a następnie **Existing Projects into Workspace**.
 3. Upewnij się, że masz zainstalowaną odpowiednią wersję **JDK** i **SDK**.
-4. Uruchom projekt wybierając lanuch **Canwedate(1)** klikając **Run** lub używając odpowiednich opcji w Eclipse.
+4. Uruchom projekt wybierając launch **Canwedate(1)** klikając **Run** lub używając odpowiednich opcji w Eclipse.
 
 ### Uruchamianie aplikacji
 
