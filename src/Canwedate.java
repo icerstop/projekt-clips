@@ -30,13 +30,14 @@ class Canwedate implements ActionListener {
 
     Canwedate() {
         try {
+        	// Getting locale resource
             canwedateresources = ResourceBundle.getBundle("resources.CanWeDateResources", Locale.getDefault());
         } catch (MissingResourceException mre) {
             mre.printStackTrace();
             return;
         }
 
-       
+       // Main frame
         JFrame jfrm = new JFrame(canwedateresources.getString("CanWeDate"));
         ImageIcon img = new ImageIcon(imagePath + "heart.png");
         jfrm.setIconImage(img.getImage());
@@ -112,18 +113,12 @@ class Canwedate implements ActionListener {
         // Display the frame
         jfrm.setVisible(true);
     }
-
+    // Function that trigger on clicking buttons
     private void nextUIState() throws Exception {
-        /*=====================*/
-        /* Get the state-list. */
-        /*=====================*/
+       
         String evalStr = "(find-all-facts ((?f state-list)) TRUE)";
 
         String currentID = clips.eval(evalStr).get(0).getFactSlot("current").toString();
-
-        /*===========================*/
-        /* Get the current UI state. */
-        /*===========================*/
 
         evalStr = "(find-all-facts ((?f UI-state)) " +
                   "(eq ?f:id " + currentID + "))";
@@ -166,7 +161,7 @@ class Canwedate implements ActionListener {
             PrimitiveValue pv = fv.getFactSlot("valid-answers");
             String selected = fv.getFactSlot("response").toString();
 
-
+            // Generate content buttons
             for (int i = 0; i < pv.size(); i++) {
                 PrimitiveValue bv = pv.get(i);
                 JRadioButton rButton;

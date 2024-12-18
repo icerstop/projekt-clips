@@ -1,7 +1,8 @@
 @echo off
 
 REM Uruchomienie aplikacji Java z odpowiednim ustawieniem ścieżki do bibliotek
-java -Djava.library.path="./Release_lib" -jar Release.jar
+REM Można odaplić program w odpowiednim języku rosyjskim, hiszpańskim oraz japońskim
+java -Djava.library.path="./Release_lib" -Duser.language=ru -jar Release.jar
 
 REM Sprawdzanie kodu zakończenia
 if %ERRORLEVEL% neq 0 (
