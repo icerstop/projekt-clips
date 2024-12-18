@@ -12,6 +12,6 @@
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_CLASSPATH_ONLY_JAR" value="false"/>
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
     <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="Canwedate"/>
-    <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="Auto"/>
+    <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="Canwedate"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="Canwedate"/>
 </launchConfiguration>
