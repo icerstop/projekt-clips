@@ -16,7 +16,7 @@ Podczas realizacji nauczyliśmy się, jak działają systemy eksperckie, jak pop
 ## Autorzy
 
 - **Andrzej Gawłowski**
-- **Jakub Bilski**
+- **Jakub Bilski - 155865**
 
 ---
 
