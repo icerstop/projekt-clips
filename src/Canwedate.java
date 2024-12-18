@@ -47,7 +47,7 @@ class Canwedate implements ActionListener {
         jfrm.getContentPane().setBackground(mainBackgroundColor);
 
         
-        jfrm.setSize(900, 400);
+        jfrm.setSize(1280, 720);
 
         // Terminate the program on close
         jfrm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
