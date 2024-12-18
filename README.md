@@ -5,7 +5,7 @@ Systemu regułowego został stworzony na potrzeby projektu **CLIPS** na przedmio
 <br/>Projekt zawiera customowe przyciski jak i obrazki opisujące fakty pozwalające określić osobę korzystającą z oprogramowania.<br/>
 Do interpretacji faktów skorzystalismy z systemu wnioskowania **CLIPS** z pomocą reguł pozwalających dość do faktu końcowego kończącego cały proces.<br/>
 
-#Umiejętności
+# Umiejętności
 Podczas realizacji nauczylismy się jak działają sysytemy eksperckie, jak poprawnie tworzyć reguł CLIPS'OWE, rozwiązywanie problemu klasyfikacji, wnioskowania opartego na danych. 
 <br/>Wybranie **JAVY** natomiast pomogło w jej lepszym zrozumieniu oraz poznaniu frameworku **SWING** do obsługi GUI.
 ---
