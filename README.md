@@ -1,4 +1,4 @@
-# Projekt Canwedate
+# Projekt CanWedate
 
 ## Opis
 System regułowy został stworzony na potrzeby projektu **CLIPS** na przedmiot Sztuczna Inteligencja.<br/>Naszym zadaniem było skonstruowanie modelu pozwalającego ułatwić użytkownikowi zdecydowanie, czy jest powinien pójść na randkę ze swoim obiektem westchnień, co sugeruje nazwa **,,CanWeDate''**.
